@@ -144,14 +144,23 @@ class redfish():
                 if spd_fan <90 and spd_fan != 0:	
                     state = "OK"
                     print(parsed['FanName'],spd_fan,state)
+                    self.logout()
                     sys.exit(0)
                 elif spd_fan >=85:
                     state = "WARNING"
                     print(parsed['FanName'],spd_fan,state)
+                    self.logout()
+                    sys.exit(1)
                 elif spd_fan == 0 or spd_fan == 90:
                     state = "CRITICAL"
                     print(parsed['FanName'],spd_fan,state)
-
+                    self.logout()
+                    sys.exit(2)
+                else:
+                   state = "UNKNOWN"
+                   print(parsed['FanName'],spd_fan,state)
+                   self.logout()
+                   sys.exit(3)
             except IndexError:
                    print("There is not such Fan {}".format(FanNumber+1))
      

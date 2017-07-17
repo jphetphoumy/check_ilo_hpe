@@ -53,6 +53,22 @@ def Logout_Request(ip,header,identifiant):
 		return header, response
 	except urllib.request.HTTPError as e:
 		print(e.read())
+
+def Chassis_Request(ip,header):
+	url = 'https://{}/redfish/v1/Chassis/1/Thermal/'.format(ip)	
+	context = ssl._create_unverified_context()
+	headers={'Content-Type' : 'application/json','X-Auth-Token' : header}
+	req = urllib.request.Request(url, headers=headers)
+	req.get_method = lambda: "GET"
+	try:
+		res = urllib.request.urlopen(req, context=context)
+		header = res.info()
+		response = res.read().decode('utf-8')
+		return header, response
+	except urllib.request.HTTPError as e:
+		print(e.read())
+
+
 class redfish():
     def __init__(self, username, password,ip,debug = False):
         """
@@ -85,6 +101,18 @@ class redfish():
             print(self.location)
             print(response[0].get('Location').split('/')[-2])
             # Set token x-auth
+
+    def get_chassis(self,FanNumber):
+        response = Chassis_Request(self.ip, self.token) 
+        if not self.debug:
+            # SHOW ALL SESSION
+            parsed = json.loads(response[1])['Fans'][FanNumber]
+            spd_fan = parsed['CurrentReading']
+            if spd_fan <90:	
+                state = "OK"
+                print(parsed['FanName'],spd_fan,state)
+                sys.exit(0)
+            #print(json.dumps(parsed,indent=4, sort_keys=True))
     def logout(self):
         """
         Logout 
@@ -100,10 +128,20 @@ class redfish():
             print("Logout {}".format(self.id))
             parsed1 = json.loads(response_Logout[1])
             print(json.dumps(parsed1,indent=4, sort_keys=True))
-    def get_FanSpd(self):
+    def get_FanSpd(self,FanNumber):
         """
         Get Speed of the ILO Fan
         """
+        response = Chassis_Request(self.ip, self.token) 
+        if not self.debug:
+            # SHOW ALL SESSION
+            parsed = json.loads(response[1])['Fans'][FanNumber]
+            spd_fan = parsed['CurrentReading']
+            if spd_fan <90:	
+                state = "OK"
+                print(parsed['FanName'],spd_fan,state)
+                sys.exit(0)
+     
     def get_hdware_Temperature(self):
         """
         Get Temperature of ILO Hardware
@@ -111,11 +149,11 @@ class redfish():
 if __name__ == "__main__":
     
     #Create argument
-    parser = argparse.ArgumentParser(description="Check Ilo Health")
+    parser = argparse.ArgumentParser(description="Check Ilo Health",epilog="usage: check_ilo_health.py -u root -p password -H 192.168.1.1 -chkFan 0")
     parser.add_argument('--username','-u',help="username who can access to ILO")
     parser.add_argument('--password','-p',help="password of your ILO Account")
     parser.add_argument('--host','-H',help="Ip of your server")
-    parser.add_argument('--checkFan','-chkFan',help="Check speed of the fan")
+    parser.add_argument('--checkFan','-chkFan',help="Check speed of the fan number x")
     parser.add_argument('--CheckTemperature','-ChkTemp',help="Check Temperature of hardware")
     parser.add_argument('--debug','-D',help="Debug mode",dest="debug",action="store_true")
     
@@ -133,4 +171,5 @@ if __name__ == "__main__":
         DEBUG = args.debug
         redfish = redfish(USERNAME, PASSWORD, HOST, DEBUG)
         redfish.auth()
+        redfish.get_chassis(int(args.checkFan)-1)
         redfish.logout()

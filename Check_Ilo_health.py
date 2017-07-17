@@ -107,6 +107,7 @@ class redfish():
         if not self.debug:
             # SHOW ALL SESSION
             parsed = json.loads(response[1])['Fans'][FanNumber]
+            print("There is not such Fan {}".format(FanNumber))
             spd_fan = parsed['CurrentReading']
             if spd_fan <90:	
                 state = "OK"
@@ -132,15 +133,27 @@ class redfish():
         """
         Get Speed of the ILO Fan
         """
+        
         response = Chassis_Request(self.ip, self.token) 
         if not self.debug:
             # SHOW ALL SESSION
-            parsed = json.loads(response[1])['Fans'][FanNumber]
-            spd_fan = parsed['CurrentReading']
-            if spd_fan <90:	
-                state = "OK"
-                print(parsed['FanName'],spd_fan,state)
-                sys.exit(0)
+            try:
+                parsed = json.loads(response[1])['Fans'][FanNumber]
+                spd_fan = parsed['CurrentReading']
+                #spd_fan = 0
+                if spd_fan <90 and spd_fan != 0:	
+                    state = "OK"
+                    print(parsed['FanName'],spd_fan,state)
+                    sys.exit(0)
+                elif spd_fan >=85:
+                    state = "WARNING"
+                    print(parsed['FanName'],spd_fan,state)
+                elif spd_fan == 0 or spd_fan == 90:
+                    state = "CRITICAL"
+                    print(parsed['FanName'],spd_fan,state)
+
+            except IndexError:
+                   print("There is not such Fan {}".format(FanNumber+1))
      
     def get_hdware_Temperature(self):
         """
@@ -171,5 +184,5 @@ if __name__ == "__main__":
         DEBUG = args.debug
         redfish = redfish(USERNAME, PASSWORD, HOST, DEBUG)
         redfish.auth()
-        redfish.get_chassis(int(args.checkFan)-1)
+        redfish.get_FanSpd(int(args.checkFan)-1)
         redfish.logout()

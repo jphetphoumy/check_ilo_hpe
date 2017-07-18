@@ -74,6 +74,43 @@ class redfish():
 			self.logout()
 		except IndexError:
 			print("There is not such Fan {}".format(FanNumber+1))
+
+	def get_Temperature(self,TempNumber):
+			"""
+			Get Speed of the ILO Fan
+			"""
+			header, res = self.http_method.get("/Chassis/1/Thermal/")	
+			try:
+				#print(res)
+				Temp = json.loads(str(res))['Temperatures']
+				TempName = Temp[TempNumber]['Name']
+				TempDeg = Temp[TempNumber]['CurrentReading']
+				TempNonCrit = Temp[TempNumber]['LowerThresholdNonCritical']
+				TempCrit = Temp[TempNumber]['LowerThresholdCritical']
+				if TempDeg <= TempNonCrit:
+					state = "OK"
+					print("{} is at {}C state is {}".format(TempName,TempDeg,state))
+					self.logout()
+					sys.exit(0)
+				elif TempDeg >= TempNonCrit:
+					state = "WARNING"
+					print("{} is at {}C state is {}".format(TempName,TempDeg,state))
+					self.logout()
+					sys.exit(1)
+				elif TempDeg >= TempCrit:
+					state = "CRITICAL"
+					print("{} is at {}C state is {}".format(TempName,TempDeg,state))
+					self.logout()
+					sys.exit(2)
+				else:
+					state = "UNKNOWN"
+					print("{} is at {}C state is {}".format(TempName,TempDeg,state))
+					self.logout()
+					sys.exit(3)
+
+				self.logout()
+			except IndexError:
+				print("There is not such Thing {}".format(FanNumber+1))
 if __name__ == "__main__":
 	
 	#Create argument
@@ -99,4 +136,7 @@ if __name__ == "__main__":
 	DEBUG = args.debug
 	redfish = redfish(USERNAME, PASSWORD, HOST, DEBUG)
 	redfish.auth()
-	redfish.get_FanSpd(int(args.checkFan)-1)
+	if args.checkFan:
+		redfish.get_FanSpd(int(args.checkFan)-1)
+	if args.CheckTemperature:
+		redfish.get_Temperature(int(args.CheckTemperature)-1)

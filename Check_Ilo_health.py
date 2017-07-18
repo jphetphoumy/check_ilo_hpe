@@ -27,15 +27,14 @@ class redfish():
 			"UserName" : self.username,
 			"Password" : self.password
 		}
-		print(data)
-		print('\n\n')
-		res, header = self.http_method.post("/SessionService/Sessions/",data)
+		header, res = self.http_method.post("/SessionService/Sessions/",data)
 		if self.debug:
+
 			print(res,header)
 		else:
 			pass
 	def logout(self):
-		res, header = self.http_method.delete("/SessionService/Sessions/")
+		header, res = self.http_method.delete("/SessionService/Sessions/")
 		if self.debug:
 			print(res,header)
 		else:
@@ -45,9 +44,33 @@ class redfish():
 		"""
 		Get Speed of the ILO Fan
 		"""
-		res,header = self.http_method.get("/Chassis/1/Thermal/")	
+		header, res = self.http_method.get("/Chassis/1/Thermal/")	
 		try:
-			print(res,header)
+			#print(res)
+			Fans = json.loads(str(res))['Fans']
+			FanName = Fans[FanNumber]['FanName']
+			spd_fan = Fans[FanNumber]['CurrentReading']
+			if spd_fan <90 and spd_fan !=0:
+				state = "OK"
+				print("{} is at {} % state is {}".format(FanName,spd_fan,state))
+				self.logout()
+				sys.exit(0)
+			elif spd_fan >=85:
+				state = "WARNING"
+				print("{} is at {} % state is {}".format(FanName,spd_fan,state))
+				self.logout()
+				sys.exit(1)
+			elif spd_fan == 0 or spd_fan >=90:
+				state = "CRITICAL"
+				print("{} is at {} % state is {}".format(FanName,spd_fan,state))
+				self.logout()
+				sys.exit(2)
+			else:
+				state = "UNKNOWN"
+				print("{} is at {} % state is {}".format(FanName,spd_fan,state))
+				self.logout()
+				sys.exit(3)
+
 			self.logout()
 		except IndexError:
 			print("There is not such Fan {}".format(FanNumber+1))

@@ -84,24 +84,29 @@ class redfish():
 				#print(res)
 				Temp = json.loads(str(res))['Temperatures']
 				TempName = Temp[TempNumber]['Name']
-				TempDeg = Temp[TempNumber]['CurrentReading']
+				TempDeg = Temp[TempNumber]['CurrentReading']	
 				TempNonCrit = Temp[TempNumber]['LowerThresholdNonCritical']
 				TempCrit = Temp[TempNumber]['LowerThresholdCritical']
-				if TempDeg <= TempNonCrit:
+				if TempCrit == 0:
+					TempCrit = 90
+				else:
+					pass
+				if TempDeg < TempNonCrit:
 					state = "OK"
 					print("{} is at {}C state is {}".format(TempName,TempDeg,state))
 					self.logout()
 					sys.exit(0)
-				elif TempDeg >= TempNonCrit:
-					state = "WARNING"
-					print("{} is at {}C state is {}".format(TempName,TempDeg,state))
-					self.logout()
-					sys.exit(1)
 				elif TempDeg >= TempCrit:
 					state = "CRITICAL"
 					print("{} is at {}C state is {}".format(TempName,TempDeg,state))
 					self.logout()
 					sys.exit(2)
+				elif TempDeg >= TempNonCrit:
+					state = "WARNING"
+					print("{} is at {}C state is {}".format(TempName,TempDeg,state))
+					self.logout()
+					sys.exit(1)
+				
 				else:
 					state = "UNKNOWN"
 					print("{} is at {}C state is {}".format(TempName,TempDeg,state))

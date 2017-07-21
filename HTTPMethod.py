@@ -1,6 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/python
+
 import json
-import urllib.request
+import urllib2
 import ssl
 import sys
 class HTTPMethod():
@@ -11,16 +12,16 @@ class HTTPMethod():
 	def MakeRequest(self,req):
 		context = ssl._create_unverified_context()
 		try:
-			res = urllib.request.urlopen(req,context=context)
+			res = urllib2.urlopen(req,context=context)
 			header = res.info()
 			response = res.read().decode('utf-8')
 			return header,response
-		except urllib.request.HTTPError as e:
+		except urllib2.HTTPError as e:
 			print(e.read())
 	def post(self,url,data):
 		url = self.url + str(url)
 		data = json.dumps(data).encode('utf-8')
-		req = urllib.request.Request(url,data)
+		req = urllib2.Request(url,data)
 		req.get_method = lambda: "POST"
 		req.add_header('Content-Type','application/json')
 		header, res = self.MakeRequest(req)
@@ -33,7 +34,7 @@ class HTTPMethod():
 		headers={
 			'Content-Type' : 'application/json','X-Auth-Token' : self.token
 		}
-		req = urllib.request.Request(url,headers=headers)
+		req = urllib2.Request(url,headers=headers)
 		req.get_method = lambda: "GET"
 		header, res = self.MakeRequest(req)
 		res = json.dumps(json.loads(res),indent=4,sort_keys=True)
@@ -44,7 +45,7 @@ class HTTPMethod():
 		headers={
 			'Content-Type' : 'application/json','X-Auth-Token' : self.token
 		}
-		req = urllib.request.Request(url,headers=headers)
+		req = urllib2.Request(url,headers=headers)
 		req.get_method = lambda: "DELETE"
 		header, res = self.MakeRequest(req)
 		res = json.dumps(json.loads(res),indent=4,sort_keys=True)

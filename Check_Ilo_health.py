@@ -1,8 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 import ssl
-import urllib.request 
-import urllib.parse
+import urllib2 
 import argparse
 import sys
 import json

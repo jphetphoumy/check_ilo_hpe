@@ -10,9 +10,10 @@ class HTTPMethod():
 		self.id = ""
 		self.token = ""
 	def MakeRequest(self,req):
-		context = ssl._create_unverified_context()
+		##context = ssl._create_unverified_context()
 		try:
-			res = urllib2.urlopen(req,context=context)
+			#res = urllib2.urlopen(req,context=context)
+			res = urllib2.urlopen(req)
 			header = res.info()
 			response = res.read().decode('utf-8')
 			return header,response

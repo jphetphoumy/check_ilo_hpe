@@ -19,7 +19,7 @@ class redfish():
 		self.ip = ip
 		self.http_method = HTTPMethod(self.ip)
 		self.debug = debug
-        self.ilo_version = ilo_version 
+		self.ilo_version = ilo_version 
 
 	def auth(self):
 		"""
@@ -33,14 +33,16 @@ class redfish():
 		header, res = self.http_method.post("/SessionService/Sessions/",data)
 
 		if self.debug:
-			print(res,header)
+			#print(res,header)
+			pass
 		else:
 			pass
 
 	def logout(self):
 		header, res = self.http_method.delete("/SessionService/Sessions/")
 		if self.debug:
-			print(res,header)
+			#print(res,header)
+			pass
 		else:
 			pass
 
@@ -52,13 +54,12 @@ class redfish():
 		try:
 			#print(res)
 			Fans = json.loads(str(res))['Fans']
-            if self.ilo_version < 4:
-                FanName = Fans[FanNumber]['FanName']
-                spd_fan = Fans[FanNumber]['CurrentReading']
-            else
-                FanName = Fans[FanNumber]['Name']
-                spd_fan = Fans[FanNumber]['ReadingUnits']
-
+			if self.ilo_version < 4:
+				FanName = Fans[FanNumber]['FanName']
+				spd_fan = Fans[FanNumber]['CurrentReading']
+			else:
+				FanName = Fans[FanNumber]['Name']
+				spd_fan = Fans[FanNumber]['ReadingUnits']
 			if spd_fan <90 and spd_fan !=0:
 				state = "OK"
 				print("{} is at {} % state is {}".format(FanName,spd_fan,state))
@@ -93,15 +94,15 @@ class redfish():
 				#print(res)
 				Temp = json.loads(str(res))['Temperatures']
 				TempName = Temp[TempNumber]['Name']
-                if self.ile_version < 4:    
-                    TempDeg = Temp[TempNumber]['ReadingCelsius']	
-                    TempNonCrit = Temp[TempNumber]['UpperThresholdNonCritical']
-                    TempCrit = Temp[TempNumber]['UpperThresholdCritical']
-                else:
-                    TempDeg = Temp[TempNumber]['CurrentReading']	
-                    TempNonCrit = Temp[TempNumber]['LowerThresholdNonCritical']
-                    TempCrit = Temp[TempNumber]['LowerThresholdCritical']
-
+				if self.ilo_version < 4:    
+					TempDeg = Temp[TempNumber]['ReadingCelsius']	
+					print(Temp[TempNumber])
+					TempNonCrit = Temp[TempNumber]['UpperThresholdCritical']
+					TempCrit = Temp[TempNumber]['UpperThresholdFatal']
+				else:
+					TempDeg = Temp[TempNumber]['CurrentReading']	
+					TempNonCrit = Temp[TempNumber]['LowerThresholdNonCritical']
+					TempCrit = Temp[TempNumber]['LowerThresholdCritical']
 				if TempCrit == 0:
 					TempCrit = 90
 				else:
@@ -141,7 +142,7 @@ if __name__ == "__main__":
 	parser.add_argument('--host','-H',help="Ip of your server")
 	parser.add_argument('--checkFan','-chkFan',help="Check speed of the fan number x")
 	parser.add_argument('--CheckTemperature','-ChkTemp',help="Check Temperature of hardware")
-	parser.add_argument('--ilo-version','-iv',help="set the ilo version", type="int")
+	parser.add_argument('--ilo-version','-iv',help="set the ilo version")
 	parser.add_argument('--debug','-D',help="Debug mode",dest="debug",action="store_true")
 	
 	#Check if argument is specified if not print print help
@@ -154,7 +155,7 @@ if __name__ == "__main__":
 	#Init redfish
 	USERNAME = args.username
 	PASSWORD = args.password
-    ILO_VERSION = args.ilo_version
+	ILO_VERSION = int(args.ilo_version)
 	HOST = args.host
 	DEBUG = args.debug
 	redfish = redfish(USERNAME, PASSWORD, HOST, DEBUG, ILO_VERSION)

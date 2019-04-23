@@ -9,14 +9,16 @@ class HTTPMethod():
 		self.id = ""
 		self.token = ""
 	def MakeRequest(self,req):
-		context = ssl._create_unverified_context()
+#		context = ssl._create_unverified_context()
 		try:
-			res = urllib.request.urlopen(req,context=context)
+			#res = urllib.request.urlopen(req,context=context)
+			res = urllib.request.urlopen(req)
 			header = res.info()
 			response = res.read().decode('utf-8')
 			return header,response
 		except urllib.request.HTTPError as e:
 			print(e.read())
+			pass
 	def post(self,url,data):
 		url = self.url + str(url)
 		data = json.dumps(data).encode('utf-8')
@@ -57,10 +59,10 @@ if  __name__ == "__main__":
 		"Password" : "monitoring_shinken"
 	}
 	res, header = http_methode.post("/SessionService/Sessions/",data)
-	print(res,header)
+	#print(res,header)
 	res,header = http_methode.get("/Chassis/1/Thermal/")
-	print(res,header)
+	#print(res,header)
 	res, header = http_methode.delete("/SessionService/Sessions/")
-	print(res,header)
+	#print(res,header)
 	
 	#print(http_methode.url)

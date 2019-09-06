@@ -19,7 +19,7 @@ class redfish():
 		self.ip = ip
 		self.http_method = HTTPMethod(self.ip)
 		self.debug = debug
-		self.ilo_version = ilo_version 
+		self.ilo_version = ilo_version
 
 	def auth(self):
 		"""
@@ -33,7 +33,7 @@ class redfish():
 		header, res = self.http_method.post("/SessionService/Sessions/",data)
 
 		if self.debug:
-			#print(res,header)
+			print(res,header)
 			pass
 		else:
 			pass
@@ -41,7 +41,7 @@ class redfish():
 	def logout(self):
 		header, res = self.http_method.delete("/SessionService/Sessions/")
 		if self.debug:
-			#print(res,header)
+			print(res,header)
 			pass
 		else:
 			pass
@@ -52,7 +52,6 @@ class redfish():
 		"""
 		header, res = self.http_method.get("/Chassis/1/Thermal/")	
 		try:
-			#print(res)
 			Fans = json.loads(str(res))['Fans']
 			if self.ilo_version < 4:
 				FanName = Fans[FanNumber]['FanName']
@@ -91,10 +90,9 @@ class redfish():
 			"""
 			header, res = self.http_method.get("/Chassis/1/Thermal/")	
 			try:
-				#print(res)
 				Temp = json.loads(str(res))['Temperatures']
 				TempName = Temp[TempNumber]['Name']
-				if self.ilo_version < 4:    
+                                if self.ilo_version < 4:
 					TempDeg = Temp[TempNumber]['ReadingCelsius']	
 					print(Temp[TempNumber])
 					TempNonCrit = Temp[TempNumber]['UpperThresholdCritical']

@@ -58,11 +58,11 @@ if  __name__ == "__main__":
 		"UserName" : "monitor",
 		"Password" : "monitoring_shinken"
 	}
-	res, header = http_methode.post("/SessionService/Sessions/",data)
+	#res, header = http_methode.post("/SessionService/Sessions/",data)
 	#print(res,header)
-	res,header = http_methode.get("/Chassis/1/Thermal/")
+	#res,header = http_methode.get("/Chassis/1/Thermal/")
+	#res, header = http_methode.get('/Systems/1/FirmwareInventory')
 	#print(res,header)
 	res, header = http_methode.delete("/SessionService/Sessions/")
 	#print(res,header)
-	
 	#print(http_methode.url)
